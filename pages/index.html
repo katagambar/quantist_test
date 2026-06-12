@@ -5,12 +5,14 @@
     <script src="https://cdn.plot.ly/plotly-2.30.0.min.js" charset="utf-8"></script>
 {% endblock %}
 
-{% block title %}Home | {% endblock %}
+{% block title %}Chart | {% endblock %}
+
+{% block page_title %}Interactive Chart{% endblock %}
 
 {% block main %}
 <div id="content" name="content" class="container mx-auto place-content-center place-items-center justify-center text-center">
     <div id="paramCard" name="paramCard" class="card card-bordered card-compact w-full bg-base-300 shadow-xl my-1">
-        <div class="flex flex-row flex-wrap flex-auto w-full p-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4 items-end w-full">
             <label class="flex flex-auto form-control">
                 <span class="label text-xs">Stock Code</span>
                 <input type="text" class="input input-bordered input-sm uppercase" id="stockcode" name="stockcode" value="{{ request.query_params.get("stockcode", "") }}" placeholder="Stock Code" maxlength="4">
@@ -25,25 +27,25 @@
             </label>
             <label class="flex flex-none form-control">
                 <span class="label text-xs">Method</span>
-                <label class="flex gap-2">
+                <label class="flex gap-2 items-center cursor-pointer">
                     <span class="text-sm">Foreign Flow</span> 
                     <input type="checkbox" id="analysismethod" name="analysismethod" value="whaleflow" class="toggle toggle-sm toggle-primary" {% if request.query_params.get("analysismethod") == "whale" %}checked{% endif %}/>
                     <span class="text-sm text-primary">Whale Flow</span> 
                 </label>
             </label>
             <label class="flex flex-initial form-control justify-center">
-                <button class="btn btn-md btn-accent" onclick="document.getElementById('analysismethod').checked ? paramWhaleModal.showModal() : paramForeignModal.showModal()">
+                <button class="btn btn-accent w-full"  onclick="document.getElementById('analysismethod').checked ? paramWhaleModal.showModal() : paramForeignModal.showModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sliders" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/></svg>
                 </button>
             </label>
             <label class="flex flex-initial form-control justify-center">
-                <button class="btn btn-md btn-primary text-white" id="getChart" name="getChart">
+                <button class="btn btn-primary text-white w-full" id="getChart" name="getChart">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>
                 </button>
             </label>
         </div>
     </div>
-    <div id="chartContainer" name="chartContainer" class="relative h-screen my-1">
+    <div id="chartContainer" name="chartContainer" class="relative h-[70vh] w-full my-4 rounded-xl overflow-hidden border border-base-300 shadow-sm">
         <div id="loadingDiv" class="absolute inset-0 flex items-center justify-center z-10 transition-opacity duration-300 opacity-100">
             <span class="loading loading-ring w-48 text-primary"></span>
         </div>
@@ -63,7 +65,7 @@
     <dialog id="paramForeignModal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box">
             <h3 class="font-bold text-lg">Foreign Chart Parameters</h3>
-            <div class="flex flex-col flex-wrap flex-auto w-full p-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full p-2">
                 <label class="flex flex-auto form-control">
                     <span class="label text-xs">Period: Money Flow</span>
                     <input type="number" class="input input-bordered input-sm" id="foreign_period_mf" name="foreign_period_mf" value="{{ request.query_params.get("foreign_period_mf", "") }}" placeholder="Period Money Flow" min=0 step=1 onkeypress="return isNumberKey(event)">
@@ -100,7 +102,7 @@
     <dialog id="paramWhaleModal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box">
             <h3 class="font-bold text-lg">Whale Chart Parameters</h3>
-            <div class="flex flex-col flex-wrap flex-auto w-full p-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full p-2">
                 <label class="flex flex-auto form-control">
                     <span class="label text-xs">clustering_method</span>
                     <select class="select select-bordered select-sm" id="whale_clustering_method" name="whale_clustering_method">

@@ -1,23 +1,67 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        {% block head %}
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}{% endblock %}Quantist.io</title>
-        <link rel="icon" href="{{ url_for('static', path='/favicon.ico') }}">
-        <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
-        {% endblock %}
-    </head>
-    <body>
-        {% block navbar %}{% include '/_partials/_navbar.html' %}{% endblock navbar %}
-        <main>
-        {% block main %}
-            <div>Welcome to Quantist.io{{ " "+name if name }}!</div>
-        {% endblock %}
-        </main>
-    </body>
-    {% block script %}
-        {% include '/_partials/_script.html' %}
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}Quantist.io</title>
+    <link rel="icon" href="{{ url_for('static', path='/favicon.ico') }}">
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
     {% endblock %}
+</head>
+<body class="bg-base-200">
+    <div class="drawer lg:drawer-open">
+        <input id="main-drawer" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content flex flex-col items-center justify-start min-h-screen">
+            <!-- Navbar -->
+            {% block navbar %}{% include '_partials/_navbar.html' %}{% endblock navbar %}
+
+            <!-- Page Content -->
+            <main class="w-full flex-grow p-4">
+            {% block main %}
+                <div>Welcome to Quantist.io{{ " "+name if name }}!</div>
+            {% endblock %}
+            </main>
+        </div>
+        <!-- Sidebar -->
+        <div class="drawer-side z-40">
+            <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+            <ul class="menu p-4 w-80 min-h-full bg-base-300 text-base-content">
+                <li class="mb-4">
+                    <a class="flex font-bold text-slate-100 text-xl" href="https://quantist.io">
+                        <img src="/static/favicon.ico" alt="Quantist.io" class="inline-block w-8 h-8 mr-2">
+                        Quantist.io
+                    </a>
+                </li>
+                <li>
+                    <a class="flex font-bold" href="/web">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up-arrow" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/></svg>
+                        Chart
+                    </a>
+                </li>
+                <li>
+                    <a class="flex font-bold" href="/web/screener">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>
+                        Screener
+                    </a>
+                </li>
+                <li>
+                    <a class="flex font-bold" href="https://t.me/quantistiobot" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/></svg>
+                        Telegram Bot
+                    </a>
+                </li>
+                <li>
+                    <a class="flex font-bold" href="https://quantist.io">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-door-fill" viewBox="0 0 16 16"><path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5"/></svg>
+                        Main Website
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% block script %}
+        {% include '_partials/_script.html' %}
+    {% endblock %}
+</body>
 </html>
