@@ -211,7 +211,7 @@ class KseiKepemilikanEfek(Base):
 	index = Column(Integer, primary_key=True, autoincrement=True, index=True, nullable=False)
 
 # INITIATE DATABASE
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # ==========
 # Flow Helper
