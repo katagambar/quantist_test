@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: quantist-api
+    env: python
+    buildCommand: "pip install -r requirements.txt && npm install && npx tailwindcss -i ./pages/src/input.css -o ./pages/static/styles.css"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ENV_PROD_DEV
+        value: DEV
+      - key: DATABASE_URL
+        sync: false
+      - key: API_KEY
+        sync: false
