@@ -33,7 +33,7 @@ if env == "DEV":
 		DB_URL = f"postgresql+psycopg://{POSTGRES_DB_USER}:{POSTGRES_DB_PASSWORD}@{POSTGRES_DB_HOST}:{POSTGRES_DB_PORT}/{POSTGRES_DB_NAME}"
 
 	# Create Engine with connection pool tweaks for Supabase
-	engine = create_engine(DB_URL, pool_pre_ping=True, pool_recycle=300)
+	engine = create_engine(DB_URL, pool_pre_ping=True, pool_recycle=300, connect_args={"sslmode": "require"})
 
 elif env == "PROD":
 	# Bigquery
