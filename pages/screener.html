@@ -1,0 +1,224 @@
+{% extends '_partials/_base.html' %}
+
+{% block title %}Screener | {% endblock %}
+
+{% block page_title %}Stock Screener{% endblock %}
+
+{% block main %}
+<div class="container mx-auto">
+    <div class="card card-bordered card-compact w-full bg-base-300 shadow-xl my-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 items-end w-full">
+            <label class="flex flex-auto form-control">
+                <span class="label text-xs">Method</span>
+                <select class="select select-bordered select-sm w-full" id="screener_method" name="screener_method">
+                    <option value="foreign" {% if request.query_params.get("screener_method") == "foreign" or not request.query_params.get("screener_method") %}selected{% endif %}>Foreign Flow</option>
+                    <option value="broker" {% if request.query_params.get("screener_method") == "broker" %}selected{% endif %}>Whale Flow (Broker)</option>
+                </select>
+            </label>
+            <label class="flex flex-auto form-control">
+                <span class="label text-xs">Screener Type</span>
+                <select class="select select-bordered select-sm w-full" id="screener_type" name="screener_type">
+                    <option value="top-money-flow" {% if request.query_params.get("screener_type") == "top-money-flow" or not request.query_params.get("screener_type") %}selected{% endif %}>Top Money Flow</option>
+                    <option value="vwap" {% if request.query_params.get("screener_type") == "vwap" %}selected{% endif %}>VWAP</option>
+                    <option value="vprofile" {% if request.query_params.get("screener_type") == "vprofile" %}selected{% endif %}>Volume Profile</option>
+                </select>
+            </label>
+
+            <!-- Dynamic Sub-params -->
+            <label class="flex flex-auto form-control" id="accum_or_distri_container">
+                <span class="label text-xs">Accum / Distri</span>
+                <select class="select select-bordered select-sm w-full" id="accum_or_distri" name="accum_or_distri">
+                    <option value="most_accumulated" {% if request.query_params.get("accum_or_distri") == "most_accumulated" or not request.query_params.get("accum_or_distri") %}selected{% endif %}>Most Accumulated</option>
+                    <option value="most_distributed" {% if request.query_params.get("accum_or_distri") == "most_distributed" %}selected{% endif %}>Most Distributed</option>
+                </select>
+            </label>
+
+            <label class="flex flex-auto form-control hidden" id="vwap_criteria_container">
+                <span class="label text-xs">VWAP Criteria</span>
+                <select class="select select-bordered select-sm w-full" id="screener_vwap_criteria" name="screener_vwap_criteria">
+                    <option value="vwap_rally" {% if request.query_params.get("screener_vwap_criteria") == "vwap_rally" or not request.query_params.get("screener_vwap_criteria") %}selected{% endif %}>Rally</option>
+                    <option value="vwap_around" {% if request.query_params.get("screener_vwap_criteria") == "vwap_around" %}selected{% endif %}>Around VWAP</option>
+                    <option value="vwap_breakout" {% if request.query_params.get("screener_vwap_criteria") == "vwap_breakout" %}selected{% endif %}>Breakout</option>
+                    <option value="vwap_breakdown" {% if request.query_params.get("screener_vwap_criteria") == "vwap_breakdown" %}selected{% endif %}>Breakdown</option>
+                </select>
+            </label>
+
+            <label class="flex flex-auto form-control hidden" id="vprofile_container">
+                 <span class="label text-xs">VProfile Criteria</span>
+                 <select class="select select-bordered select-sm w-full" id="screener_vprofile_criteria" name="screener_vprofile_criteria">
+                    <option value="vprofile_around" {% if request.query_params.get("screener_vprofile_criteria") == "vprofile_around" or not request.query_params.get("screener_vprofile_criteria") %}selected{% endif %}>Around VProfile</option>
+                    <option value="vprofile_breakout" {% if request.query_params.get("screener_vprofile_criteria") == "vprofile_breakout" %}selected{% endif %}>Breakout</option>
+                    <option value="vprofile_breakdown" {% if request.query_params.get("screener_vprofile_criteria") == "vprofile_breakdown" %}selected{% endif %}>Breakdown</option>
+                    <option value="vprofile_inside" {% if request.query_params.get("screener_vprofile_criteria") == "vprofile_inside" %}selected{% endif %}>Inside VProfile</option>
+                 </select>
+            </label>
+
+            <label class="flex flex-initial form-control justify-center h-full">
+                <button class="btn btn-primary text-white w-full" id="getScreener" name="getScreener">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>
+                    Screen
+                </button>
+            </label>
+        </div>
+    </div>
+
+    <!-- Table Result -->
+    <div class="card card-bordered card-compact w-full bg-base-100 shadow-xl my-4">
+        <div class="overflow-x-auto w-full min-h-[50vh]">
+            <table class="table table-zebra w-full" id="screenerTable">
+                <!-- head -->
+                <thead id="screenerTableHead">
+                    <tr>
+                        <th>Code</th>
+                        <th>Close</th>
+                        <th>Money Flow</th>
+                        <th>Prop</th>
+                        <th>Correl</th>
+                        <th>VWAP</th>
+                    </tr>
+                </thead>
+                <tbody id="screenerTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center py-10 opacity-50">Select criteria and click screen to view results</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div id="loadingDiv" class="absolute inset-0 flex items-center justify-center z-10 transition-opacity duration-300 opacity-0 bg-base-100/50 pointer-events-none">
+                <span class="loading loading-ring w-24 text-primary"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_ENDPOINT = '{{ "undefined"|getenv("API_SCHEME") }}'+'://'+'{{ "undefined"|getenv("API_HOST") }}';
+    const API_KEY = '{{ "undefined"|getenv("API_KEY") }}';
+
+    function toggleSubParams() {
+        const type = document.getElementById('screener_type').value;
+        document.getElementById('accum_or_distri_container').classList.add('hidden');
+        document.getElementById('vwap_criteria_container').classList.add('hidden');
+        document.getElementById('vprofile_container').classList.add('hidden');
+
+        if (type === 'top-money-flow') {
+            document.getElementById('accum_or_distri_container').classList.remove('hidden');
+        } else if (type === 'vwap') {
+            document.getElementById('vwap_criteria_container').classList.remove('hidden');
+        } else if (type === 'vprofile') {
+            document.getElementById('vprofile_container').classList.remove('hidden');
+        }
+    }
+
+    document.getElementById('screener_type').addEventListener('change', toggleSubParams);
+
+    function fetchScreener() {
+        document.getElementById('loadingDiv').classList.remove('opacity-0');
+        document.getElementById('loadingDiv').classList.add('opacity-100');
+
+        const method = document.getElementById('screener_method').value;
+        const type = document.getElementById('screener_type').value;
+        const queryParam = new URLSearchParams();
+
+        queryParam.append('screener_method', method);
+        queryParam.append('screener_type', type);
+
+        let url = `${API_ENDPOINT}/whaleanalysis/screener/${method}/${type}?media_type=json`;
+
+        if (type === 'top-money-flow') {
+            const accum = document.getElementById('accum_or_distri').value;
+            url += `&accum_or_distri=${accum}`;
+            queryParam.append('accum_or_distri', accum);
+        } else if (type === 'vwap') {
+            const vwap = document.getElementById('screener_vwap_criteria').value;
+            url += `&screener_vwap_criteria=${vwap}`;
+            queryParam.append('screener_vwap_criteria', vwap);
+        } else if (type === 'vprofile') {
+            // Note: Currently backend might not have vprofile criteria exposed completely, but let's send it
+            const vprofile = document.getElementById('screener_vprofile_criteria').value;
+            url += `&screener_vprofile_criteria=${vprofile}`;
+            queryParam.append('screener_vprofile_criteria', vprofile);
+        }
+
+        const newUrl = window.location.pathname + '?' + queryParam.toString();
+        window.history.pushState({path: newUrl}, '', newUrl);
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-API-KEY': API_KEY
+            }
+        }).then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        }).then(data => {
+            renderTable(data);
+        }).catch(err => {
+            console.error(err);
+            const tbody = document.getElementById('screenerTableBody');
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">Failed to fetch data</td></tr>`;
+        }).finally(() => {
+            document.getElementById('loadingDiv').classList.add('opacity-0');
+            document.getElementById('loadingDiv').classList.remove('opacity-100');
+        });
+    }
+
+    function renderTable(data) {
+        // data should be an array of objects representing rows.
+        const tbody = document.getElementById('screenerTableBody');
+        tbody.innerHTML = '';
+
+        // Sometimes JSON from pandas orient='records' looks like [{code: "...", close: ...}, ...]
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center">No results found</td></tr>`;
+            return;
+        }
+
+        // Handle case where it might be wrapped
+        let rows = data;
+        if (data.data) rows = data.data;
+
+        // Create headers dynamically based on first row keys
+        if (rows.length > 0) {
+             const keys = Object.keys(rows[0]);
+             const thead = document.getElementById('screenerTableHead');
+             thead.innerHTML = '<tr>' + keys.map(k => `<th class="uppercase text-xs">${k}</th>`).join('') + '</tr>';
+        }
+
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            Object.values(row).forEach(val => {
+                const td = document.createElement('td');
+                // Format numbers if possible
+                if (typeof val === 'number') {
+                    // Check if it's a huge number (like money flow) or small (like proportion)
+                    if (val > 10000 || val < -10000) {
+                        td.textContent = val.toLocaleString();
+                    } else if (val % 1 !== 0) {
+                        td.textContent = val.toFixed(2);
+                    } else {
+                        td.textContent = val;
+                    }
+                    td.classList.add('text-right');
+                } else {
+                    td.textContent = val;
+                }
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById('getScreener').addEventListener('click', fetchScreener);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleSubParams();
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('screener_type')) {
+            fetchScreener();
+        }
+    });
+</script>
+{% endblock %}

@@ -40,8 +40,12 @@ templates.env.filters['getenv'] = getenv
 @router.get("", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
 @router.get("/", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
 @timeit
-async def index(request: Request, name: str|None = None):
-	return templates.TemplateResponse(request=request, name="index.html", context={"name": name})
+async def index(request: Request):
+	return templates.TemplateResponse(request=request, name="index.html", context={})
 
-# TODO: router with query parameters
-# TODO: screener
+
+@router.get("/screener", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+@router.get("/screener/", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+@timeit
+async def screener(request: Request):
+	return templates.TemplateResponse(request=request, name="screener.html", context={})

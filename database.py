@@ -15,15 +15,25 @@ env: str = os.getenv("ENV_PROD_DEV", "DEV")
 
 # Create Database SQLAlchemy Engine
 if env == "DEV":
-	# PostgreSQL
-	POSTGRES_DB_USER: str = os.getenv("POSTGRES_DB_USER","")
-	POSTGRES_DB_PASSWORD: str = os.getenv("POSTGRES_DB_PASSWORD","")
-	POSTGRES_DB_HOST: str = os.getenv("POSTGRES_DB_HOST","")
-	POSTGRES_DB_NAME: str = os.getenv("POSTGRES_DB_NAME","")
-	DB_URL: str = f"postgresql+psycopg://{POSTGRES_DB_USER}:{POSTGRES_DB_PASSWORD}@{POSTGRES_DB_HOST}/{POSTGRES_DB_NAME}"
+	# PostgreSQL - Supports single DATABASE_URL or individual parts
+	DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+	if DATABASE_URL:
+		# SQLAlchemy 2.0+ needs postgresql+psycopg schema if user just provided postgres:// or postgresql://
+		if DATABASE_URL.startswith("postgres://"):
+			DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+		elif DATABASE_URL.startswith("postgresql://"):
+			DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
+		DB_URL = DATABASE_URL
+	else:
+		POSTGRES_DB_USER: str = os.getenv("POSTGRES_DB_USER", "")
+		POSTGRES_DB_PASSWORD: str = os.getenv("POSTGRES_DB_PASSWORD", "")
+		POSTGRES_DB_HOST: str = os.getenv("POSTGRES_DB_HOST", "localhost")
+		POSTGRES_DB_PORT: str = os.getenv("POSTGRES_DB_PORT", "5432")
+		POSTGRES_DB_NAME: str = os.getenv("POSTGRES_DB_NAME", "")
+		DB_URL = f"postgresql+psycopg://{POSTGRES_DB_USER}:{POSTGRES_DB_PASSWORD}@{POSTGRES_DB_HOST}:{POSTGRES_DB_PORT}/{POSTGRES_DB_NAME}"
 
-	# Create Engine
-	engine = create_engine(DB_URL)
+	# Create Engine with connection pool tweaks for Supabase
+	engine = create_engine(DB_URL, pool_pre_ping=True, pool_recycle=300, connect_args={"sslmode": "require"})
 
 elif env == "PROD":
 	# Bigquery
@@ -201,7 +211,7 @@ class KseiKepemilikanEfek(Base):
 	index = Column(Integer, primary_key=True, autoincrement=True, index=True, nullable=False)
 
 # INITIATE DATABASE
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # ==========
 # Flow Helper

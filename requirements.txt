@@ -135,7 +135,7 @@ protobuf==4.25.3
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.3
+psycopg[binary]==3.2.3
     # via quantist-api (pyproject.toml)
 pyarrow==18.1.0
     # via quantist-api (pyproject.toml)
